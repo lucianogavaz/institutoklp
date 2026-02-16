@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Table, Typography, Card, Input, Button, message, Select, Space, Row, Col, Statistic, Tabs, List, Tag, Badge, Modal, Form, DatePicker } from 'antd';
+import { Table, Typography, Card, Input, Button, message, Select, Space, Row, Col, Statistic, Tabs, List, Tag, Badge, Modal, Form } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { SearchOutlined, SaveOutlined, DownloadOutlined, WarningOutlined, CheckCircleOutlined, EditOutlined } from '@ant-design/icons';
 import { birthdayService } from '../services/api';
@@ -40,15 +40,8 @@ const Birthdays: React.FC = () => {
   const handleEdit = (record: BirthdayData) => {
     setEditingRecord(record);
     // Convert date for form if possible, else leave empty or string
-    let initialDate = null;
-    if (record.DataNascimento) {
-      // Parsing logic similar to what we use for display/filtering
-      /* 
-         Simpler for now: just load the value. 
-         If it's serial number, we might want to convert to Date for DatePicker? 
-         Yes, better UX.
-      */
-    }
+    // Convert date for form if possible, else leave empty or string
+    // Logic for date parsing removed as it was unused
     form.setFieldsValue({
       ...record,
       // DataNascimento logic will be handled inside effect or directly here if simple
@@ -373,7 +366,7 @@ const Birthdays: React.FC = () => {
                     <Select
                       defaultValue="all"
                       style={{ width: 150 }}
-                      onChange={val => setPeriod(val)}
+                      onChange={val => setPeriod(val as 'first_half' | 'second_half' | 'all')}
                       options={[
                         { value: 'all', label: 'Todo o Mês' },
                         { value: 'first_half', label: '1ª Quinzena (1-15)' },
@@ -470,7 +463,7 @@ const Birthdays: React.FC = () => {
                   }>
                     <List
                       dataSource={qualityStats.emptyNames}
-                      renderItem={item => <List.Item><Typography.Text type="secondary">Registro sem nome</Typography.Text></List.Item>}
+                      renderItem={_item => <List.Item><Typography.Text type="secondary">Registro sem nome</Typography.Text></List.Item>}
                     />
                   </Card>
                 </Col>

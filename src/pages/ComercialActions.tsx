@@ -8,7 +8,7 @@ import type { ColumnsType } from 'antd/es/table';
 import {
   SearchOutlined, PlusOutlined, EditOutlined, DownloadOutlined,
   DollarOutlined, CheckCircleOutlined, WhatsAppOutlined,
-  FilterOutlined, ClearOutlined, CloudSyncOutlined, CloudUploadOutlined
+  FilterOutlined, ClearOutlined, CloudSyncOutlined
 } from '@ant-design/icons';
 import { Column, Pie } from '@ant-design/charts';
 import { salesService } from '../services/api';
@@ -613,7 +613,7 @@ const ComercialActions: React.FC = () => {
                   filterOption={(inputValue, option) =>
                     option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                   }
-                  onSelect={(value, option) => {
+                  onSelect={(_value, option) => {
                     if (option.fone) {
                       form.setFieldsValue({ fone: option.fone });
                     }

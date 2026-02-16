@@ -1,5 +1,6 @@
 
-import React, { Component, ErrorInfo, ReactNode } from "react";
+import { Component } from "react";
+import type { ErrorInfo, ReactNode } from "react";
 import { Typography, Card, Button } from "antd";
 
 const { Title, Paragraph, Text } = Typography;
