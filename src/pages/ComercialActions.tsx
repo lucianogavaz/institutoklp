@@ -2,13 +2,13 @@ import React, { useEffect, useState, useMemo } from 'react';
 import {
   Table, Typography, Card, Input, Button, message, Select, Row, Col,
   Statistic, Tabs, Modal, Form, InputNumber, Tag, DatePicker,
-  Tooltip, Divider, Empty, notification, AutoComplete
+  Tooltip, Divider, Empty, AutoComplete
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   SearchOutlined, PlusOutlined, EditOutlined, DownloadOutlined,
   DollarOutlined, CheckCircleOutlined, WhatsAppOutlined,
-  FilterOutlined, ClearOutlined, CloudSyncOutlined
+  FilterOutlined, ClearOutlined
 } from '@ant-design/icons';
 import { Column, Pie } from '@ant-design/charts';
 import { salesService } from '../services/api';
@@ -142,48 +142,29 @@ const ComercialActions: React.FC = () => {
       orcamento: values.orcamento || null,
     };
 
-    let updatedList: CommercialAction[];
+    let recordToSave: CommercialAction;
     if (editingRecord) {
-      updatedList = data.map(item =>
-        item.id === editingRecord.id ? { ...item, ...formattedValues } : item
-      );
+      recordToSave = { ...editingRecord, ...formattedValues };
     } else {
-      const newRecord: CommercialAction = {
+      recordToSave = {
         id: `new-${Date.now()}`,
         ...formattedValues,
         tipoProcedimento: formattedValues.tipoProcedimento || '',
         profissional: formattedValues.profissional || '',
         observacoes: formattedValues.observacoes || '',
       };
-      updatedList = [...data, newRecord];
     }
 
-    setData(updatedList);
     setIsModalOpen(false);
     form.resetFields();
 
     try {
-      const resp: any = await salesService.save(updatedList);
-
-      if (resp && resp.cloudSuccess) {
-        notification.success({
-          message: 'Salvo com Sucesso!',
-          description: 'Dados salvos localmente e sincronizados na Nuvem.',
-          icon: <CloudSyncOutlined style={{ color: '#52c41a' }} />,
-          placement: 'topRight',
-        });
-      } else if (resp && resp.cloudSuccess === false) {
-        notification.warning({
-          message: 'Salvo Localmente',
-          description: `Salvo no Excel, mas falha na Nuvem: ${resp.cloudError}`,
-        });
-      } else {
-        message.success(editingRecord ? 'Ação atualizada!' : 'Nova ação adicionada!');
-      }
-
+      await salesService.saveSingle(recordToSave);
+      message.success(editingRecord ? 'Ação atualizada com sucesso!' : 'Nova ação adicionada com sucesso!');
       fetchData();
     } catch (error: any) {
-      const msg = error.response?.data?.error || 'Erro ao salvar no Excel.';
+      console.error('Erro ao salvar ação:', error);
+      const msg = error?.message || 'Erro ao salvar no Supabase.';
       message.error(msg);
     }
   };

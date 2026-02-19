@@ -94,9 +94,57 @@ export const salesService = {
             throw error;
         }
     },
+    saveSingle: async (item: any) => {
+        try {
+            const record: any = {
+                data: item.data,
+                nome: item.nome,
+                fone: item.fone,
+                acao: item.acao,
+                origem_campanha: item.origemCampanha,
+                orcamento: item.orcamento,
+                canal_venda: item.canalVenda,
+                status_atendimento: item.statusAtendimento,
+                fechamento: item.fechamento,
+                valor: item.valor,
+                tipo_procedimento: item.tipoProcedimento,
+                profissional: item.profissional,
+                observacoes: item.observacoes,
+            };
+
+            const isNew = !item.id || item.id.toString().startsWith('new-');
+
+            if (isNew) {
+                // INSERT: don't send id, let Supabase auto-generate it
+                const { data, error } = await supabase
+                    .from('comercial_actions')
+                    .insert(record)
+                    .select();
+
+                if (error) throw error;
+                return { success: true, data: data?.[0] };
+            } else {
+                // UPDATE: include the existing id
+                record.id = item.id;
+                const { data, error } = await supabase
+                    .from('comercial_actions')
+                    .upsert(record, { onConflict: 'id' })
+                    .select();
+
+                if (error) throw error;
+                return { success: true, data: data?.[0] };
+            }
+        } catch (error) {
+            console.error('Erro ao salvar ação comercial:', error);
+            throw error;
+        }
+    },
     save: async (newData: any[]) => {
         try {
-            const supabaseData = newData.map(item => {
+            const newRecords = [];
+            const existingRecords = [];
+
+            for (const item of newData) {
                 const record: any = {
                     data: item.data,
                     nome: item.nome,
@@ -115,19 +163,31 @@ export const salesService = {
 
                 if (item.id && !item.id.toString().startsWith('new-')) {
                     record.id = item.id;
+                    existingRecords.push(record);
+                } else {
+                    newRecords.push(record);
                 }
+            }
 
-                return record;
-            });
+            // Insert new records (without id, Supabase auto-generates)
+            if (newRecords.length > 0) {
+                const { error: insertError } = await supabase
+                    .from('comercial_actions')
+                    .insert(newRecords);
 
-            const { data, error } = await supabase
-                .from('comercial_actions')
-                .upsert(supabaseData, { onConflict: 'id' })
-                .select();
+                if (insertError) throw insertError;
+            }
 
-            if (error) throw error;
+            // Upsert existing records (with id)
+            if (existingRecords.length > 0) {
+                const { error: upsertError } = await supabase
+                    .from('comercial_actions')
+                    .upsert(existingRecords, { onConflict: 'id' });
 
-            return { success: true, count: data.length };
+                if (upsertError) throw upsertError;
+            }
+
+            return { success: true, count: newData.length };
         } catch (error) {
             console.error('Erro ao salvar vendas:', error);
             throw error;
