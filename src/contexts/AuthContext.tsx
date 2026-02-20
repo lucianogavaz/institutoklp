@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const resetPassword = (email: string) => {
         return supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + '/reset-password', // We'll create this route later if full flow needed, or just let supabase handle link
+            redirectTo: 'https://institutoklp.netlify.app/reset-password',
         });
     };
 
