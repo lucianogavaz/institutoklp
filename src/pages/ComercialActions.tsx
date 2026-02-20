@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import {
   Table, Typography, Card, Input, Button, message, Select, Row, Col,
   Statistic, Tabs, Modal, Form, InputNumber, Tag, DatePicker,
-  Tooltip, Divider, Empty, AutoComplete
+  Tooltip, Divider, Empty, AutoComplete, List
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -20,10 +20,12 @@ import {
   TIPO_PROCEDIMENTO_OPTIONS, PROFISSIONAL_OPTIONS
 } from '../types';
 import dayjs from 'dayjs';
+import { useMediaQuery } from 'react-responsive';
 
 const { Title, Text } = Typography;
 
 const ComercialActions: React.FC = () => {
+  const isMobile = useMediaQuery({ maxWidth: 768 });
   const [data, setData] = useState<CommercialAction[]>([]);
   const [filteredData, setFilteredData] = useState<CommercialAction[]>([]);
   const [loading, setLoading] = useState(false);
@@ -381,7 +383,7 @@ const ComercialActions: React.FC = () => {
   };
 
   return (
-    <div style={{ width: '100%', padding: '0 24px', minHeight: '100vh' }}>
+    <div style={{ width: '100%', padding: isMobile ? '0 8px' : '0 24px', minHeight: '100vh', paddingBottom: isMobile ? 80 : 0 }}>
       {/* Header */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -512,25 +514,93 @@ const ComercialActions: React.FC = () => {
                   )}
                 </div>
 
-                <Table
-                  columns={columns}
-                  dataSource={filteredData}
-                  loading={loading}
-                  pagination={{
-                    defaultPageSize: 20,
-                    showTotal: (total, range) => `${range[0]}-${range[1]} de ${total} registros`,
-                  }}
-                  scroll={{ x: 1366 }}
-                  size="middle"
-                  rowKey="id"
-                  locale={{
-                    emptyText: <Empty description="Nenhuma ação comercial encontrada" />,
-                    triggerAsc: 'Clique para ordenar em ordem crescente',
-                    triggerDesc: 'Clique para ordenar em ordem decrescente',
-                    cancelSort: 'Clique para cancelar a ordenação'
-                  }}
-                  rowClassName={(_record, index) => index % 2 === 0 ? '' : 'ant-table-row-striped'}
-                />
+                {isMobile ? (
+                  <List
+                    grid={{ gutter: 12, column: 1 }}
+                    dataSource={filteredData}
+                    loading={loading}
+                    pagination={{
+                      defaultPageSize: 10,
+                      size: 'small',
+                      showTotal: (total, range) => `${range[0]}-${range[1]} de ${total}`,
+                    }}
+                    renderItem={(item: CommercialAction) => (
+                      <List.Item style={{ padding: 0, marginBottom: 12 }}>
+                        <Card size="small" style={{ width: '100%', borderRadius: 8, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                            <div style={{ maxWidth: '70%' }}>
+                              <Text strong style={{ fontSize: 15, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.nome || '-'}</Text>
+                              {item.fone && (
+                                <a
+                                  href={`https://wa.me/55${String(item.fone).replace(/\\D/g, '')}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  style={{ fontSize: 13, color: '#25D366', display: 'flex', alignItems: 'center', marginTop: 4 }}
+                                >
+                                  <WhatsAppOutlined style={{ marginRight: 4 }} /> {item.fone}
+                                </a>
+                              )}
+                            </div>
+                            <Text type="secondary" style={{ fontSize: 12 }}>{item.data || '-'}</Text>
+                          </div>
+                          <Divider style={{ margin: '8px 0' }} />
+                          <Row gutter={[8, 8]}>
+                            <Col span={12}>
+                              <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>Ação</Text>
+                              <Text style={{ fontSize: 12 }}>{item.acao || '-'}</Text>
+                            </Col>
+                            <Col span={12}>
+                              <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>Canal</Text>
+                              <Text style={{ fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.canalVenda || '-'}</Text>
+                            </Col>
+                            <Col span={12}>
+                              <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>Status</Text>
+                              <Tag color={getStatusColor(item.statusAtendimento || '')} style={{ fontSize: 11 }}>{item.statusAtendimento || '-'}</Tag>
+                            </Col>
+                            <Col span={12}>
+                              <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>Fechamento</Text>
+                              <Tag color={getFechamentoColor(item.fechamento || '')} style={{ fontSize: 11 }}>{item.fechamento || '-'}</Tag>
+                            </Col>
+                          </Row>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, background: '#f8f9fa', padding: 8, borderRadius: 6 }}>
+                            <div>
+                              <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>Valor</Text>
+                              <Text strong style={{ color: '#08979c', fontSize: 14 }}>R$ {Number(item.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Text>
+                            </div>
+                            <div style={{ display: 'flex', gap: 8 }}>
+                              {item.observacoes && (
+                                <Tooltip title={item.observacoes}>
+                                  <Button type="text" icon={<div style={{ color: '#faad14' }}>📝</div>} size="small" />
+                                </Tooltip>
+                              )}
+                              <Button type="primary" icon={<EditOutlined />} size="small" onClick={() => handleEdit(item)}>Editar</Button>
+                            </div>
+                          </div>
+                        </Card>
+                      </List.Item>
+                    )}
+                  />
+                ) : (
+                  <Table
+                    columns={columns}
+                    dataSource={filteredData}
+                    loading={loading}
+                    pagination={{
+                      defaultPageSize: 20,
+                      showTotal: (total, range) => `${range[0]}-${range[1]} de ${total} registros`,
+                    }}
+                    scroll={{ x: 1366 }}
+                    size="middle"
+                    rowKey="id"
+                    locale={{
+                      emptyText: <Empty description="Nenhuma ação comercial encontrada" />,
+                      triggerAsc: 'Clique para ordenar em ordem crescente',
+                      triggerDesc: 'Clique para ordenar em ordem decrescente',
+                      cancelSort: 'Clique para cancelar a ordenação'
+                    }}
+                    rowClassName={(_record, index) => index % 2 === 0 ? '' : 'ant-table-row-striped'}
+                  />
+                )}
               </Card>
             ),
           },
@@ -594,8 +664,8 @@ const ComercialActions: React.FC = () => {
                   filterOption={(inputValue, option) =>
                     option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                   }
-                  onSelect={(_value, option) => {
-                    if (option.fone) {
+                  onSelect={(_value, option: any) => {
+                    if (option && option.fone) {
                       form.setFieldsValue({ fone: option.fone });
                     }
                   }}

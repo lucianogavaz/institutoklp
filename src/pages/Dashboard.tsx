@@ -7,11 +7,12 @@ import {
 import { Column, Pie } from '@ant-design/charts';
 import { salesService } from '../services/api';
 import type { CommercialAction } from '../types';
-
+import { useMediaQuery } from 'react-responsive';
 
 const { Title, Text } = Typography;
 
 const Dashboard: React.FC = () => {
+  const isMobile = useMediaQuery({ maxWidth: 768 });
   const [data, setData] = useState<CommercialAction[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -76,7 +77,7 @@ const Dashboard: React.FC = () => {
     label: { text: (d: any) => d.value, style: { fill: '#fff' } },
     color: '#08979c',
     columnStyle: { radius: [4, 4, 0, 0] },
-    height: 300,
+    height: isMobile ? 220 : 300,
   };
 
   const funnelConfig = {
@@ -87,7 +88,7 @@ const Dashboard: React.FC = () => {
     innerRadius: 0.55,
     label: false,
     legend: { position: 'bottom' as const },
-    height: 300,
+    height: isMobile ? 220 : 300,
   };
 
   if (loading) {
@@ -100,8 +101,8 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div style={{ maxWidth: 1680, margin: '0 auto' }}>
-      <Title level={3} style={{ marginBottom: 20 }}>Dashboard Comercial</Title>
+    <div style={{ maxWidth: 1680, margin: '0 auto', paddingBottom: isMobile ? 80 : 0 }}>
+      <Title level={isMobile ? 4 : 3} style={{ marginBottom: 20 }}>Dashboard Comercial</Title>
 
       {/* Cards Principais - linha única */}
       <Row gutter={[12, 12]} style={{ marginBottom: 20 }}>

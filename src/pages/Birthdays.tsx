@@ -1,8 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
-import { Table, Typography, Card, Input, Button, message, Select, Space, Row, Col, Statistic, Tabs, List, Tag, Badge, Modal, Form } from 'antd';
+import { Table, Typography, Card, Input, Button, message, Select, Space, Row, Col, Statistic, Tabs, List, Tag, Badge, Modal, Form, Divider } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { SearchOutlined, SaveOutlined, DownloadOutlined, WarningOutlined, CheckCircleOutlined, EditOutlined } from '@ant-design/icons';
+import { SearchOutlined, SaveOutlined, DownloadOutlined, WarningOutlined, CheckCircleOutlined, EditOutlined, WhatsAppOutlined } from '@ant-design/icons';
+import { useMediaQuery } from 'react-responsive';
 import { birthdayService } from '../services/api';
 import { exportService } from '../services/exportService';
 import { Column } from '@ant-design/charts';
@@ -17,6 +18,7 @@ interface BirthdayData {
 }
 
 const Birthdays: React.FC = () => {
+  const isMobile = useMediaQuery({ maxWidth: 768 });
   const [data, setData] = useState<BirthdayData[]>([]);
   const [filteredData, setFilteredData] = useState<BirthdayData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -300,28 +302,28 @@ const Birthdays: React.FC = () => {
     qualityStats.invalidDates.length;
 
   return (
-    <div>
+    <div style={{ width: '100%', padding: isMobile ? '0 8px' : '0', paddingBottom: isMobile ? 80 : 0 }}>
       <div style={{ marginBottom: 24 }}>
         <Title level={2}>Painel de Aniversariantes</Title>
         <Row gutter={[16, 16]}>
-          <Col span={6}>
-            <Card>
-              <Statistic title="Total de Clientes" value={data.length} />
+          <Col xs={12} sm={6}>
+            <Card bodyStyle={{ padding: isMobile ? '12px 8px' : 24 }}>
+              <Statistic title="Clientes" value={data.length} valueStyle={{ fontSize: isMobile ? 20 : 24 }} />
             </Card>
           </Col>
-          <Col span={6}>
-            <Card>
+          <Col xs={12} sm={6}>
+            <Card bodyStyle={{ padding: isMobile ? '12px 8px' : 24 }}>
               <Statistic
-                title="Problemas Encontrados"
+                title="Problemas"
                 value={totalIssues}
-                valueStyle={{ color: totalIssues > 0 ? '#cf1322' : '#3f8600' }}
+                valueStyle={{ color: totalIssues > 0 ? '#cf1322' : '#3f8600', fontSize: isMobile ? 20 : 24 }}
                 prefix={totalIssues > 0 ? <WarningOutlined /> : <CheckCircleOutlined />}
               />
             </Card>
           </Col>
-          <Col span={12}>
-            <Card title="Distribuição Anual">
-              <Column {...birthdayConfig} />
+          <Col xs={24} sm={12}>
+            <Card title="Distribuição Anual" bodyStyle={{ padding: isMobile ? '12px 8px' : 24 }}>
+              <Column {...birthdayConfig} height={isMobile ? 140 : 200} />
             </Card>
           </Col>
         </Row>
@@ -336,16 +338,16 @@ const Birthdays: React.FC = () => {
             children: (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
-                  <Space wrap>
+                  <Space wrap style={{ width: '100%' }}>
                     <Input
                       placeholder="Buscar por nome..."
                       prefix={<SearchOutlined />}
-                      style={{ width: 200 }}
+                      style={{ width: isMobile ? '100%' : 200 }}
                       onChange={e => setSearchText(e.target.value)}
                     />
                     <Select
                       placeholder="Mês"
-                      style={{ width: 120 }}
+                      style={{ width: isMobile ? '48%' : 120 }}
                       allowClear
                       onChange={val => setSelectedMonth(val)}
                       options={[
@@ -365,12 +367,12 @@ const Birthdays: React.FC = () => {
                     />
                     <Select
                       defaultValue="all"
-                      style={{ width: 150 }}
+                      style={{ width: isMobile ? '48%' : 150 }}
                       onChange={val => setPeriod(val as 'first_half' | 'second_half' | 'all')}
                       options={[
                         { value: 'all', label: 'Todo o Mês' },
-                        { value: 'first_half', label: '1ª Quinzena (1-15)' },
-                        { value: 'second_half', label: '2ª Quinzena (16+)' },
+                        { value: 'first_half', label: '1ª Quinz. (1-15)' },
+                        { value: 'second_half', label: '2ª Quinz. (16+)' },
                       ]}
                     />
                     <Button
@@ -378,19 +380,50 @@ const Birthdays: React.FC = () => {
                       icon={<DownloadOutlined />}
                       onClick={handleExport}
                       disabled={filteredData.length === 0}
+                      style={{ width: isMobile ? '100%' : 'auto' }}
                     >
-                      Exportar CSV ({filteredData.length})
+                      Exportar ({filteredData.length})
                     </Button>
                   </Space>
                 </div>
 
-                <Card>
-                  <Table
-                    columns={columns}
-                    dataSource={filteredData}
-                    loading={loading}
-                    pagination={{ pageSize: 10 }}
-                  />
+                <Card bodyStyle={{ padding: isMobile ? 8 : 24 }}>
+                  {isMobile ? (
+                    <List
+                      grid={{ gutter: 12, column: 1 }}
+                      dataSource={filteredData}
+                      loading={loading}
+                      pagination={{ pageSize: 10, size: 'small', showTotal: (total, range) => `${range[0]}-${range[1]} de ${total}` }}
+                      renderItem={(item: BirthdayData) => (
+                        <List.Item style={{ padding: 0, marginBottom: 16 }}>
+                          <Card size="small" style={{ width: '100%', borderRadius: 8, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                              <div style={{ maxWidth: '75%' }}>
+                                <Typography.Text strong style={{ fontSize: 15, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.Nome || '-'}</Typography.Text>
+                                {item.Celular && (
+                                  <a href={`https://wa.me/55${String(item.Celular).replace(/\\D/g, '')}`} style={{ fontSize: 13, color: '#25D366', display: 'flex', alignItems: 'center', marginTop: 6 }} target="_blank" rel="noreferrer">
+                                    <WhatsAppOutlined style={{ marginRight: 4 }} /> {item.Celular}
+                                  </a>
+                                )}
+                              </div>
+                              <Typography.Text type="secondary" style={{ fontSize: 13 }}>{item.DataNascimento || '-'}</Typography.Text>
+                            </div>
+                            <Divider style={{ margin: '12px 0 8px' }} />
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                              <Button type="primary" icon={<EditOutlined />} size="small" onClick={() => handleEdit(item)}>Editar</Button>
+                            </div>
+                          </Card>
+                        </List.Item>
+                      )}
+                    />
+                  ) : (
+                    <Table
+                      columns={columns}
+                      dataSource={filteredData}
+                      loading={loading}
+                      pagination={{ pageSize: 10 }}
+                    />
+                  )}
                 </Card>
               </>
             )
@@ -405,7 +438,7 @@ const Birthdays: React.FC = () => {
             ),
             children: (
               <Row gutter={[16, 16]}>
-                <Col span={12}>
+                <Col xs={24} sm={12}>
                   <Card title="Nomes Duplicados" extra={
                     <Space>
                       <Tag color="warning">{qualityStats.duplicateNames.length}</Tag>
@@ -426,7 +459,7 @@ const Birthdays: React.FC = () => {
                     />
                   </Card>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} sm={12}>
                   <Card title="Telefones Duplicados" extra={
                     <Space>
                       <Tag color="warning">{qualityStats.duplicatePhones.length}</Tag>
@@ -447,7 +480,7 @@ const Birthdays: React.FC = () => {
                     />
                   </Card>
                 </Col>
-                <Col span={8}>
+                <Col xs={24} sm={8}>
                   <Card title="Nomes em Branco" extra={
                     <Space>
                       <Tag color="error">{qualityStats.emptyNames.length}</Tag>
@@ -467,7 +500,7 @@ const Birthdays: React.FC = () => {
                     />
                   </Card>
                 </Col>
-                <Col span={8}>
+                <Col xs={24} sm={8}>
                   <Card title="Telefones em Branco" extra={
                     <Space>
                       <Tag color="error">{qualityStats.emptyPhones.length}</Tag>
@@ -487,7 +520,7 @@ const Birthdays: React.FC = () => {
                     />
                   </Card>
                 </Col>
-                <Col span={8}>
+                <Col xs={24} sm={8}>
                   <Card title="Datas Inválidas" extra={
                     <Space>
                       <Tag color="error">{qualityStats.invalidDates.length}</Tag>
