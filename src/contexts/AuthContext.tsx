@@ -46,7 +46,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const signUp = (email: string, pass: string) => {
-        return supabase.auth.signUp({ email, password: pass });
+        return supabase.auth.signUp({
+            email,
+            password: pass,
+            options: {
+                emailRedirectTo: 'https://institutoklp.netlify.app/',
+            }
+        });
     };
 
     const signOut = () => {
