@@ -61,13 +61,13 @@ export const Login: React.FC = () => {
         <div style={{
             display: 'flex', flexDirection: 'column',
             justifyContent: 'center', alignItems: 'center',
-            height: '100vh', background: '#f0f2f5'
+            minHeight: '100vh', background: '#f0f2f5', padding: 16
         }}>
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
                 <img src="/logo.png" alt="CRM KLP" style={{ maxWidth: 200, height: 'auto', marginBottom: 16 }} />
             </div>
 
-            <Card style={{ width: 400, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+            <Card style={{ width: '100%', maxWidth: 400, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
                 {error && <Alert message={error} type="error" showIcon style={{ marginBottom: 16 }} closable onClose={() => setError(null)} />}
                 {success && <Alert message={success} type="success" showIcon style={{ marginBottom: 16 }} closable onClose={() => setSuccess(null)} />}
 
